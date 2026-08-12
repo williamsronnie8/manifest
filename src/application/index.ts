@@ -1,4 +1,5 @@
 import {
+  M1_SCENARIO,
   createInitialState,
   getResult,
   transition,
@@ -44,6 +45,40 @@ export interface SessionProjection {
   readonly trucks: Readonly<Record<TruckId, TruckState>>;
   readonly loads: Readonly<Record<LoadId, LoadState>>;
   readonly result: Result;
+}
+
+export interface ScenarioProjection {
+  dayEndMinute: number;
+  objective: { kind: "deliver_all_loads"; loadIds: string[] };
+  locations: string[];
+  travelMinutes: Record<string, Record<string, number>>;
+  trucks: Record<
+    string,
+    { id: string; initialLocationId: string; capacity: number }
+  >;
+  loads: Record<
+    string,
+    {
+      id: string;
+      originId: string;
+      destinationId: string;
+      size: number;
+    }
+  >;
+}
+
+export function getScenarioProjection(): ScenarioProjection {
+  return clonePlainData({
+    dayEndMinute: M1_SCENARIO.dayEndMinute,
+    objective: {
+      kind: "deliver_all_loads" as const,
+      loadIds: Object.keys(M1_SCENARIO.loads),
+    },
+    locations: M1_SCENARIO.locations,
+    travelMinutes: M1_SCENARIO.travelMinutes,
+    trucks: M1_SCENARIO.trucks,
+    loads: M1_SCENARIO.loads,
+  }) as unknown as ScenarioProjection;
 }
 
 export function createSession(): Session {
