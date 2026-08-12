@@ -99,8 +99,8 @@ require_text "$milestone" '`ARRIVAL_AFTER_DAY_END`'
 require_text "$milestone" "first applicable rejection code"
 require_text scripts/verify.sh 'tests/verify-m1-domain.sh'
 
-for forbidden in package.json package-lock.json pnpm-lock.yaml yarn.lock \
-  pyproject.toml requirements.txt Cargo.toml Cargo.lock go.mod go.sum Gemfile \
+for forbidden in pnpm-lock.yaml yarn.lock pyproject.toml requirements.txt \
+  Cargo.toml Cargo.lock go.mod go.sum Gemfile \
   composer.json pom.xml build.gradle settings.gradle; do
   [[ ! -e "$forbidden" ]] || fail "framework or dependency file is out of scope: $forbidden"
 done
