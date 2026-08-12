@@ -22,26 +22,37 @@ player command through the headless engine to a usable interface projection.
 
 ## Acceptance scenarios
 
+The fixed scenario and command semantics are defined by ADR-0002. The valid
+complete-day route delivers L1 and L3 with T1, and L2 and L4 with T2. Its final
+delivery occurs at minute 150.
+
 1. **Complete day:** a valid command sequence delivers all four loads with two
-   trucks before the operating day ends.
+   trucks before the operating day ends and reports `delivered_count: 4`,
+   `all_delivered: true`, and `completion_minute: 150`.
 2. **Capacity rejection:** a pickup that would exceed truck capacity is
-   rejected and changes no state.
+   rejected as `CAPACITY_EXCEEDED` and changes no state.
 3. **Location rejection:** pickup or delivery without required co-location is
-   rejected and changes no state.
+   rejected as `WRONG_LOCATION` and changes no state.
 4. **No teleportation:** truck location changes only after a declared travel
    leg reaches an arrival event.
 5. **Terminal delivery:** a delivered load cannot be moved or delivered again.
 6. **Day boundary:** work that cannot validly begin after day end is rejected,
-   and undelivered loads remain visible in the result.
+   travel that would arrive after minute 480 returns
+   `ARRIVAL_AFTER_DAY_END`, and undelivered loads remain visible in the result.
 7. **Replay:** the same scenario, seed, and ordered commands produce the same
    ordered event log and final state in repeated headless runs.
 8. **Interface parity:** the playable interface reports the same state and
    result as the headless run; it owns no logistics rule.
 
+Every rejected command returns the first applicable rejection code in
+ADR-0002's precedence, appends no accepted event, consumes no event sequence,
+does not advance time, and leaves domain state unchanged.
+
 ## Engineering exit criteria
 
-- The domain decisions left open in `docs/DOMAIN.md` are resolved in tickets
-  and ADRs before implementation asks the junior to encode them.
+- The domain decisions formerly left open in `docs/DOMAIN.md` remain resolved
+  by ADR-0002; implementation does not substitute different constants or
+  rejection semantics.
 - The deterministic simulation engine runs the complete scenario without a UI.
 - Unit tests cover every domain invariant exercised by M1.
 - At least one end-to-end headless fixture proves the complete-day scenario and

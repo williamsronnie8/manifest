@@ -97,14 +97,14 @@ The ordering may not run backward.
 12. **The engine owns truth.** UI projections, persistence adapters, and logs
     derived for display cannot create or alter domain facts.
 
-## Open domain decisions
+## Resolved M1 contract
 
-The first implementation ticket must decide, with an ADR when consequential:
+[ADR-0002](adr/0002-m1-scenario-semantics.md) binds the first implementation
+to integer simulation minutes from 0 through 480, the fixed Depot, North, and
+South scenario, two capacity-2 trucks, four declared loads, symmetric travel
+durations, four command types, ordered typed rejections, and a delivered-load
+count score with no due dates or lateness.
 
-- the concrete unit for simulation time;
-- truck capacity and load-size units;
-- travel duration between each pair of locations;
-- the command rejection taxonomy;
-- the day-end scoring rule and whether lateness exists in M1.
-
-Until those decisions are written, the junior must not guess them.
+The ADR is authoritative when a concise rule here needs implementation detail.
+Later milestones may add scenario configuration or richer scoring through a
+successor decision, but M1 code must not invent or substitute those rules.

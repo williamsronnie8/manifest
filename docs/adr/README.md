@@ -9,6 +9,7 @@ it. They describe decisions, not meeting history.
 | ADR | Status | Decision |
 | --- | --- | --- |
 | [0001](0001-headless-deterministic-simulation.md) | Accepted | Keep the simulation headless and deterministic, independent of UI technology |
+| [0002](0002-m1-scenario-semantics.md) | Accepted | Fix the M1 clock, scenario, commands, rejection order, and scoring contract |
 
 ## Convention
 
