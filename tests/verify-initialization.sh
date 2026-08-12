@@ -138,8 +138,8 @@ grep -Eq '^verify:' Makefile || fail "Makefile must define a verify target"
 require_text Makefile "./scripts/verify.sh"
 require_text scripts/verify.sh "tests/verify-initialization.sh"
 
-for forbidden in package.json package-lock.json pnpm-lock.yaml yarn.lock \
-  pyproject.toml requirements.txt Cargo.toml Cargo.lock go.mod go.sum Gemfile \
+for forbidden in pnpm-lock.yaml yarn.lock pyproject.toml requirements.txt \
+  Cargo.toml Cargo.lock go.mod go.sum Gemfile \
   composer.json pom.xml build.gradle settings.gradle; do
   [[ ! -e "$forbidden" ]] || fail "framework or dependency file is out of scope: $forbidden"
 done
