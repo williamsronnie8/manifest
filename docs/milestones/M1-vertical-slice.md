@@ -59,6 +59,8 @@ does not advance time, and leaves domain state unchanged.
   replay equality.
 - Adapter tests prove commands and projections cross the UI boundary without
   duplicating engine rules.
+- A real-browser smoke proves the clickable complete-day route, typed rejection
+  feedback, reset, and replay against the same application facade.
 - `make verify` runs all repository checks from the root with a nonzero exit on
   failure.
 - No unresolved blocker is disguised as a default value or inferred domain
@@ -72,17 +74,22 @@ does not advance time, and leaves domain state unchanged.
   open-ended economy.
 - Save migration, cloud sync, analytics, modding, localization, and production
   deployment.
-- Framework selection inside this initialization. A later ADR must justify it
-  before scaffolding begins.
+- A component framework, state store, router, backend, or server-owned game
+  state. ADR-0004 selects direct DOM rendering and static output for M1.
 
 ## Suggested ticket sequence
 
 This sequence records dependencies, not authorization to implement:
 
-1. decide the remaining M1 domain constants and rejection taxonomy;
-2. choose the implementation language and application boundary through an ADR;
-3. define red engine contracts for state, commands, events, and replay;
-4. implement the headless complete-day scenario;
-5. select the smallest interface approach supported by evidence;
-6. connect projections and commands into the playable loop;
-7. verify all acceptance scenarios and capture the milestone evidence.
+1. completed: decide the M1 domain constants and rejection taxonomy;
+2. completed: choose the implementation language and application boundary;
+3. completed: define red engine contracts for state, commands, events, and
+   replay;
+4. completed: implement the headless complete-day scenario;
+5. completed by ADR-0004: select the smallest interface approach supported by
+   evidence;
+6. define the senior-owned red browser-adapter contract, including the detached
+   application scenario projection and real-browser smoke;
+7. route the bounded browser-adapter implementation behind those frozen tests;
+8. independently inspect the rendered loop, verify every acceptance scenario,
+   and capture the milestone evidence.
