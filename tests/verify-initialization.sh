@@ -83,7 +83,11 @@ require_text README.md "docs/DOMAIN.md"
 require_text README.md "docs/ARCHITECTURE.md"
 require_text README.md "docs/adr/README.md"
 require_text README.md "docs/milestones/M1-vertical-slice.md"
-require_text README.md "No application framework has been selected"
+require_text README.md "engine and application facade are implemented"
+require_text README.md "framework-free browser interface"
+require_text README.md "Vite"
+require_text README.md "npm run dev"
+require_text README.md "npx playwright install chromium"
 
 for heading in "## Player promise" "## Learning goals" "## Initial scope" \
   "## Non-goals" "## Success criteria" "## Decision principles"; do

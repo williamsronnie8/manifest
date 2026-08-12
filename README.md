@@ -9,9 +9,11 @@ The first playable slice covers one simulated operating day: two trucks deliver
 four loads among three locations. It is intentionally small enough to explain,
 test, replay, and review end to end.
 
-No application framework has been selected. Framework selection is a later,
-separately justified architecture decision. This initialization contains no
-game functionality.
+The deterministic engine and application facade are implemented and verified.
+ADR-0004 selects a framework-free browser interface using standards-based DOM
+APIs, with Vite as development and build tooling. The browser adapter is the
+next bounded slice; there is still no backend, persistence service, account
+system, or server-owned game state.
 
 ## Project foundations
 
@@ -37,6 +39,20 @@ Run all repository checks from the root:
 make verify
 ```
 
-The command is deliberately dependency-free during initialization. A later
-framework ADR may extend it, but the root command remains the stable entry
-point.
+Install the Chromium build pinned to the Playwright dependency before running
+the real-browser checks on a new workstation or CI image:
+
+```sh
+npx playwright install chromium
+```
+
+Once the browser adapter implementation lands, start the local player surface
+with:
+
+```sh
+npm run dev
+```
+
+The root verification command remains the stable gate. It type-checks and
+tests the headless engine, builds the static browser artifact, and exercises
+the clickable loop in a real headless browser.
