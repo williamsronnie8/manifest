@@ -1,8 +1,9 @@
 # Architecture principles
 
 Manifest begins with boundaries, not a framework. This document fixes the
-dependency direction required for the first vertical slice while leaving
-language, application framework, rendering, and persistence choices open.
+dependency direction required for the first vertical slice. ADR-0003 selects
+strict TypeScript and the application boundary while leaving the application
+framework, rendering, deployment, and persistence choices open.
 
 ## Architectural center
 
@@ -18,22 +19,24 @@ inward toward stable domain contracts.
 ## Dependency direction
 
 ```text
-UI / CLI / test scenario
-          |
-          v
-   command boundary
-          |
-          v
-deterministic simulation engine  --->  append-only ordered event log
-          |
-          v
- read-only state projections
+UI / CLI / persistence adapter
+              |
+              v
+ TypeScript application facade  --->  in-memory accepted-event history
+              |
+              v
+deterministic simulation engine
+              |
+              v
+   new state / typed rejection
 ```
 
 - Inputs enter as typed, validated commands.
 - The engine either rejects a command without changing state or applies it as
   an atomic transition.
-- Accepted transitions emit an append-only ordered event log.
+- Accepted transitions return ordered events; the application facade appends
+  them to its in-memory event history.
+- That history is the append-only ordered event log required by ADR-0001.
 - Read models and screen projections are derived from engine state and events.
 - The UI is an adapter: it renders projections and submits commands. It does
   not calculate travel, capacity, eligibility, load lifecycle, or scoring.
@@ -49,18 +52,38 @@ deterministic simulation engine  --->  append-only ordered event log
 - Equivalent runs have structurally comparable events and final state. Display
   timestamps, object addresses, and unordered iteration cannot leak into truth.
 
-## Proposed logical components
+## Chosen implementation boundary
 
-These names describe responsibilities, not source directories or packages:
+Manifest uses one root TypeScript package for M1. TypeScript compiles to
+standard ECMAScript modules, and a supported Node LTS release hosts headless
+verification. The engine itself remains portable: `src/engine/` must not
+import Node, browser, UI, filesystem, network, database, wall-clock, or ambient
+random APIs.
 
-1. **Scenario definition** loads immutable locations, trucks, loads, operating
-   limits, and optional seed.
-2. **Command boundary** validates player intent against the current state.
-3. **Simulation engine** applies domain transitions and scheduled events.
-4. **Event log** records accepted facts in stable order.
-5. **Projection layer** creates read-only views for a UI, CLI, tests, and
-   eventual persistence.
-6. **Adapters** translate external input and output without owning rules.
+The dependency direction is `src/adapters/` -> `src/application/` ->
+`src/engine/`. Production adapters use the application facade rather than
+engine internals. Exact public symbols and field shapes are fixed by
+senior-authored engine-contract tests after ADR-0003.
+
+## Logical components
+
+These names describe responsibilities within the chosen source boundaries:
+
+1. **Engine scenario definition** represents immutable locations, trucks,
+   loads, operating limits, and optional seed.
+2. **Engine command boundary** validates player intent against current state
+   and returns either a new state with events or one typed rejection.
+3. **Engine transition logic** applies domain changes and scheduled events
+   without mutating its input or consulting ambient state.
+4. **Application session** owns current state and appends accepted facts to an
+   in-memory ordered event history.
+5. **Application replay and projections** create read-only views for a UI,
+   CLI, tests, and eventual persistence.
+6. **Adapters** parse external input and translate output without owning rules.
+
+Boundary values are plain, structurally comparable primitives, arrays, and
+records. Runtime-specific objects and class identity do not cross the boundary.
+Serialization and persistence formats are still separate decisions.
 
 ## Error and state principles
 
@@ -72,10 +95,11 @@ These names describe responsibilities, not source directories or packages:
 
 ## Decisions intentionally deferred
 
-The application language, application framework, UI renderer, deployment
-model, persistence mechanism, serialization format, and packaging remain
-undecided. In short, all delivery-technology choices remain undecided. Each may
-be selected only when a separate ADR states requirements,
-alternatives, evidence, consequences, and reversal conditions.
+The application framework, UI renderer, deployment model, persistence
+mechanism, and serialization format remain undecided. Packaging beyond the
+single M1 root package also remains undecided until a real independent consumer
+or lifecycle requires it. Each may be selected only when a separate ADR states
+requirements, alternatives, evidence, consequences, and reversal conditions.
 
-This initialization adds no framework scaffold and no game functionality.
+ADR-0003 selects language and boundaries only. It adds no framework scaffold or
+game functionality.
