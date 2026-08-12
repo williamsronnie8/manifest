@@ -10,6 +10,7 @@ it. They describe decisions, not meeting history.
 | --- | --- | --- |
 | [0001](0001-headless-deterministic-simulation.md) | Accepted | Keep the simulation headless and deterministic, independent of UI technology |
 | [0002](0002-m1-scenario-semantics.md) | Accepted | Fix the M1 clock, scenario, commands, rejection order, and scoring contract |
+| [0003](0003-implementation-language-and-application-boundary.md) | Accepted | Use strict TypeScript with a Node-hosted, adapter-to-application-to-engine boundary |
 
 ## Convention
 
