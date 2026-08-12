@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Manifest one-day dispatch simulation" />
+    <title>Manifest</title>
+    <link rel="stylesheet" href="/src/adapters/browser/styles.css" />
+  </head>
+  <body>
+    <main id="app"></main>
+    <script type="module">
+      import { mountManifest } from "/src/adapters/browser/index.ts";
+
+      const root = document.querySelector("#app");
+      if (!(root instanceof HTMLElement)) {
+        throw new Error("Manifest mount point is missing");
+      }
+      mountManifest(root);
+    </script>
+  </body>
+</html>
