@@ -2,8 +2,9 @@
 
 Manifest begins with boundaries, not a framework. This document fixes the
 dependency direction required for the first vertical slice. ADR-0003 selects
-strict TypeScript and the application boundary while leaving the application
-framework, rendering, deployment, and persistence choices open.
+strict TypeScript and the application boundary. ADR-0004 selects a
+framework-free local browser adapter and Vite build tooling for M1 while
+leaving hosting, persistence, and serialization choices open.
 
 ## Architectural center
 
@@ -19,7 +20,7 @@ inward toward stable domain contracts.
 ## Dependency direction
 
 ```text
-UI / CLI / persistence adapter
+M1 browser adapter / future CLI or persistence adapter
               |
               v
  TypeScript application facade  --->  in-memory accepted-event history
@@ -65,6 +66,13 @@ The dependency direction is `src/adapters/` -> `src/application/` ->
 engine internals. Exact public symbols and field shapes are fixed by
 senior-authored engine-contract tests after ADR-0003.
 
+For M1, browser code lives in `src/adapters/browser/`. The browser adapter imports only the public application facade
+from `src/application/index.js`.
+It renders detached session and scenario projections, constructs commands from
+external control values, and retains only interface state. It never imports
+engine internals or calculates domain eligibility. Browser globals do not cross
+into the application or engine layers.
+
 ## Logical components
 
 These names describe responsibilities within the chosen source boundaries:
@@ -78,8 +86,11 @@ These names describe responsibilities within the chosen source boundaries:
 4. **Application session** owns current state and appends accepted facts to an
    in-memory ordered event history.
 5. **Application replay and projections** create read-only views for a UI,
-   CLI, tests, and eventual persistence.
+   CLI, tests, and eventual persistence. The M1 scenario projection exposes the
+   authored objective and constraints without exposing mutable engine state.
 6. **Adapters** parse external input and translate output without owning rules.
+   The M1 browser adapter owns the current session, accepted-command replay
+   journal, selected controls, latest rejection, and DOM lifecycle only.
 
 Boundary values are plain, structurally comparable primitives, arrays, and
 records. Runtime-specific objects and class identity do not cross the boundary.
@@ -93,13 +104,28 @@ Serialization and persistence formats are still separate decisions.
 - State should be serializable in a stable, reviewable form once persistence is
   selected.
 
+## M1 player interface boundary
+
+The M1 player surface is a local single-page browser application built with
+framework-free TypeScript, standards-based DOM APIs, and Vite. Its production
+output is static. There is no backend or server-owned game state.
+
+The browser adapter validates command shape but does not validate domain
+membership or eligibility. Each validly shaped player action reaches the
+application facade exactly once. Accepted commands extend the adapter's replay
+journal; rejected commands leave the session, journal, and accepted event
+history unchanged. Rendering comes from application projections and history,
+never by reconstructing truth from the DOM.
+
+Root verification retains `tsc` type-checking, because Vite's TypeScript pass
+is transpilation only. Adapter contracts, a production build, and a
+real-browser smoke join the engine checks before M1 can close.
+
 ## Decisions intentionally deferred
 
-The application framework, UI renderer, deployment model, persistence
-mechanism, and serialization format remain undecided. Packaging beyond the
-single M1 root package also remains undecided until a real independent consumer
-or lifecycle requires it. Each may be selected only when a separate ADR states
-requirements, alternatives, evidence, consequences, and reversal conditions.
-
-ADR-0003 selects language and boundaries only. It adds no framework scaffold or
-game functionality.
+M1 deliberately uses no application framework. A later framework requires a
+successor to ADR-0004 and measured need. Hosting, persistence, serialization,
+save migration, animation technology, and packaging beyond the single root
+package remain undecided until a real capability requires them. Each may be
+selected only when a separate ADR states requirements, alternatives, evidence,
+consequences, and reversal conditions.
