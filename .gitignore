@@ -4,5 +4,6 @@
 *.swp
 *.tmp
 coverage/
+node_modules/
 dist/
 build/
