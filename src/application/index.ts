@@ -2,6 +2,7 @@ import {
   createInitialState,
   getResult,
   transition,
+  M1_SCENARIO,
   type Command,
   type EngineEvent,
   type LoadId,
@@ -76,6 +77,20 @@ export function projectSession(session: Session): SessionProjection {
     loads: clonePlainData(session.state.loads),
     result: getResult(session.state),
   };
+}
+
+export function getScenarioProjection() {
+  return clonePlainData({
+    dayEndMinute: M1_SCENARIO.dayEndMinute,
+    objective: {
+      kind: "deliver_all_loads",
+      loadIds: Object.keys(M1_SCENARIO.loads),
+    },
+    locations: M1_SCENARIO.locations,
+    travelMinutes: M1_SCENARIO.travelMinutes,
+    trucks: M1_SCENARIO.trucks,
+    loads: M1_SCENARIO.loads,
+  });
 }
 
 export function replayCommands(commands: readonly Command[]): ReplayOutcome {
