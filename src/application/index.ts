@@ -1,6 +1,7 @@
 import {
   createInitialState,
   getResult,
+  M1_SCENARIO,
   transition,
   type Command,
   type EngineEvent,
@@ -46,6 +47,29 @@ export interface SessionProjection {
   readonly result: Result;
 }
 
+export interface ScenarioProjection {
+  dayEndMinute: number;
+  objective: {
+    kind: string;
+    loadIds: string[];
+  };
+  locations: string[];
+  travelMinutes: Record<string, Record<string, number>>;
+  trucks: Record<
+    string,
+    { id: string; initialLocationId: string; capacity: number }
+  >;
+  loads: Record<
+    string,
+    {
+      id: string;
+      originId: string;
+      destinationId: string;
+      size: number;
+    }
+  >;
+}
+
 export function createSession(): Session {
   return { state: createInitialState(), events: [] };
 }
@@ -76,6 +100,12 @@ export function projectSession(session: Session): SessionProjection {
     loads: clonePlainData(session.state.loads),
     result: getResult(session.state),
   };
+}
+
+export function getScenarioProjection(): ScenarioProjection {
+  // BEGIN T-0075 PROJECTION BODY
+  throw new Error("PROJECTION_NOT_IMPLEMENTED");
+  // END T-0075 PROJECTION BODY
 }
 
 export function replayCommands(commands: readonly Command[]): ReplayOutcome {
