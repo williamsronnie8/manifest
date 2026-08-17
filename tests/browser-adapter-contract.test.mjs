@@ -68,7 +68,10 @@ test("the browser adapter is Node-safe and imports only the application facade",
   const imports = [...source.matchAll(/from\s+["']([^"']+)["']/g)].map(
     (match) => match[1],
   );
-  assert.deepEqual(imports, ["../../application/index.js"]);
+  assert.deepEqual(imports, [
+    "../../application/index.js",
+    "./parse-command.js",
+  ]);
   assert.doesNotMatch(source, /engine\/index|\.\.\/\.\.\/engine/);
 });
 
