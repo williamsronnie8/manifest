@@ -104,7 +104,18 @@ export function projectSession(session: Session): SessionProjection {
 
 export function getScenarioProjection(): ScenarioProjection {
   // BEGIN T-0075 PROJECTION BODY
-  throw new Error("PROJECTION_NOT_IMPLEMENTED");
+  const projection: ScenarioProjection = {
+    dayEndMinute: M1_SCENARIO.dayEndMinute,
+    objective: {
+      kind: "deliver_all_loads",
+      loadIds: Object.keys(M1_SCENARIO.loads),
+    },
+    locations: [...M1_SCENARIO.locations],
+    travelMinutes: { ...M1_SCENARIO.travelMinutes },
+    trucks: { ...M1_SCENARIO.trucks },
+    loads: { ...M1_SCENARIO.loads },
+  };
+  return clonePlainData(projection);
   // END T-0075 PROJECTION BODY
 }
 
