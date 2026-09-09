@@ -14,9 +14,7 @@ The project teaches disciplined software engineering through a working game:
 - translate product intent into explicit domain rules;
 - separate deterministic business logic from presentation technology;
 - make small vertical slices with observable outcomes;
-- use tests, event history, and architecture decisions as durable evidence;
-- route bounded implementation through Foreman without giving the worker
-  product or architecture decisions.
+- use tests, event history, and architecture decisions as durable evidence.
 
 ## Initial scope
 

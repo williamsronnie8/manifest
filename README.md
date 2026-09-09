@@ -27,9 +27,8 @@ game functionality.
 
 ## Working here
 
-Manifest is a Foreman target. Claude and Codex plan and route work through
-Foreman, eligible bounded implementation runs on the local junior, and Ronnie
-alone merges `main`. See `AGENTS.md` or `CLAUDE.md` before changing the repo.
+Work on a branch and open a pull request. Ronnie alone merges `main`.
+See `AGENTS.md` or `CLAUDE.md` before changing the repo.
 
 Run all repository checks from the root:
 
