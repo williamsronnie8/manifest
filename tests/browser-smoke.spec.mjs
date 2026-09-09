@@ -1,11 +1,11 @@
 import { expect, test } from "@playwright/test";
 
 async function chooseCommand(page, command) {
-  await page.getByLabel("Command").selectOption(command.type);
+  await page.getByLabel("Command", { exact: true }).selectOption(command.type);
 
-  const truck = page.getByLabel("Truck");
-  const load = page.getByLabel("Load");
-  const destination = page.getByLabel("Destination");
+  const truck = page.getByLabel("Truck", { exact: true });
+  const load = page.getByLabel("Load", { exact: true });
+  const destination = page.getByLabel("Destination", { exact: true });
 
   if (command.type === "pickup" || command.type === "deliver") {
     await expect(truck).toBeVisible();
@@ -69,15 +69,15 @@ test("the clickable complete day reaches minute 150 and replays identically", as
   for (const name of ["Operation", "Trucks", "Loads", "Accepted events", "Result"]) {
     await expect(page.getByRole("region", { name })).toBeVisible();
   }
-  expect(await optionValues(page.getByLabel("Command"))).toEqual([
+  expect(await optionValues(page.getByLabel("Command", { exact: true }))).toEqual([
     "pickup",
     "travel",
     "deliver",
     "advance",
   ]);
-  expect(await optionValues(page.getByLabel("Truck"))).toEqual(["T1", "T2"]);
-  expect(await optionValues(page.getByLabel("Load"))).toEqual(["L1", "L2", "L3", "L4"]);
-  expect(await optionValues(page.getByLabel("Destination"))).toEqual([
+  expect(await optionValues(page.getByLabel("Truck", { exact: true }))).toEqual(["T1", "T2"]);
+  expect(await optionValues(page.getByLabel("Load", { exact: true }))).toEqual(["L1", "L2", "L3", "L4"]);
+  expect(await optionValues(page.getByLabel("Destination", { exact: true }))).toEqual([
     "Depot",
     "North",
     "South",
@@ -85,12 +85,12 @@ test("the clickable complete day reaches minute 150 and replays identically", as
 
   for (const command of completeDayCommands) await submit(page, command);
 
-  await expect(page.getByLabel("Current minute")).toHaveText("150");
-  await expect(page.getByLabel("Delivered loads")).toHaveText("L1, L2, L3, L4");
-  await expect(page.getByLabel("Undelivered loads")).toHaveText("None");
-  await expect(page.getByLabel("All delivered")).toHaveText("yes");
-  await expect(page.getByLabel("Completion minute")).toHaveText("150");
-  await expect(page.getByLabel("Accepted command count")).toHaveText("16");
+  await expect(page.getByLabel("Current minute", { exact: true })).toHaveText("150");
+  await expect(page.getByLabel("Delivered loads", { exact: true })).toHaveText("L1, L2, L3, L4");
+  await expect(page.getByLabel("Undelivered loads", { exact: true })).toHaveText("None");
+  await expect(page.getByLabel("All delivered", { exact: true })).toHaveText("yes");
+  await expect(page.getByLabel("Completion minute", { exact: true })).toHaveText("150");
+  await expect(page.getByLabel("Accepted command count", { exact: true })).toHaveText("16");
   await expect(page.getByRole("status")).toHaveText("Accepted: load_delivered");
 
   const events = page
@@ -123,7 +123,7 @@ test("the clickable complete day reaches minute 150 and replays identically", as
   await expect(page.getByRole("status")).toHaveText(
     "Replay matched 16 accepted events.",
   );
-  await expect(page.getByLabel("Current minute")).toHaveText("150");
+  await expect(page.getByLabel("Current minute", { exact: true })).toHaveText("150");
   await expect(events).toHaveCount(16);
   expect(
     await events.evaluateAll((nodes) =>
@@ -141,8 +141,8 @@ test("a capacity rejection is atomic and reset restores the initial browser stat
   await submit(page, { type: "pickup", truckId: "T1", loadId: "L1" });
 
   await expect(page.getByRole("status")).toHaveText("Rejected: CAPACITY_EXCEEDED");
-  await expect(page.getByLabel("Current minute")).toHaveText("0");
-  await expect(page.getByLabel("Accepted command count")).toHaveText("1");
+  await expect(page.getByLabel("Current minute", { exact: true })).toHaveText("0");
+  await expect(page.getByLabel("Accepted command count", { exact: true })).toHaveText("1");
   await expect(
     page.getByRole("region", { name: "Accepted events" }).locator("[data-event-type]"),
   ).toHaveCount(1);
@@ -157,12 +157,12 @@ test("a capacity rejection is atomic and reset restores the initial browser stat
 
   await page.getByRole("button", { name: "Reset day" }).click();
   await expect(page.getByRole("status")).toHaveText("Day reset.");
-  await expect(page.getByLabel("Current minute")).toHaveText("0");
-  await expect(page.getByLabel("Delivered loads")).toHaveText("None");
-  await expect(page.getByLabel("Undelivered loads")).toHaveText("L1, L2, L3, L4");
-  await expect(page.getByLabel("All delivered")).toHaveText("no");
-  await expect(page.getByLabel("Completion minute")).toHaveText("Not complete");
-  await expect(page.getByLabel("Accepted command count")).toHaveText("0");
+  await expect(page.getByLabel("Current minute", { exact: true })).toHaveText("0");
+  await expect(page.getByLabel("Delivered loads", { exact: true })).toHaveText("None");
+  await expect(page.getByLabel("Undelivered loads", { exact: true })).toHaveText("L1, L2, L3, L4");
+  await expect(page.getByLabel("All delivered", { exact: true })).toHaveText("no");
+  await expect(page.getByLabel("Completion minute", { exact: true })).toHaveText("Not complete");
+  await expect(page.getByLabel("Accepted command count", { exact: true })).toHaveText("0");
   await expect(
     page.getByRole("region", { name: "Accepted events" }).locator("[data-event-type]"),
   ).toHaveCount(0);
