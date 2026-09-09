@@ -4,15 +4,24 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=22 <23"
+    "node": ">=22.12 <23"
   },
   "exports": {
     ".": "./dist/application/index.js"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.json"
+    "build": "tsc --project tsconfig.json",
+    "build:browser": "vite build",
+    "dev": "vite --host 127.0.0.1",
+    "play": "npm run build && npm run build:browser && vite preview --host 127.0.0.1 --port 4174 --strictPort --open",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "test:adapter": "node --test tests/browser-adapter-contract.test.mjs tests/parse-command-contract.test.mjs tests/scenario-projection-contract.test.mjs",
+    "test:browser": "playwright test --config playwright.config.mjs",
+    "verify:adapter": "npm run build && npm run test:adapter && npm run build:browser"
   },
   "devDependencies": {
-    "typescript": "7.0.2"
+    "@playwright/test": "1.62.1",
+    "typescript": "7.0.2",
+    "vite": "8.2.1"
   }
 }

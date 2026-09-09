@@ -271,11 +271,10 @@ export function transition(state: State, command: Command): TransitionOutcome {
 }
 
 function pickup(state: State, command: PickupCommand): TransitionOutcome {
+  if (!Object.hasOwn(state.trucks, command.truckId)) return reject(state, "UNKNOWN_TRUCK");
   const truck = state.trucks[command.truckId];
-  if (truck === undefined) return reject(state, "UNKNOWN_TRUCK");
-
+  if (!Object.hasOwn(state.loads, command.loadId)) return reject(state, "UNKNOWN_LOAD");
   const load = state.loads[command.loadId];
-  if (load === undefined) return reject(state, "UNKNOWN_LOAD");
   if (state.minute >= M1_SCENARIO.dayEndMinute) {
     return reject(state, "DAY_ENDED");
   }
@@ -332,8 +331,8 @@ function pickup(state: State, command: PickupCommand): TransitionOutcome {
 }
 
 function travel(state: State, command: TravelCommand): TransitionOutcome {
+  if (!Object.hasOwn(state.trucks, command.truckId)) return reject(state, "UNKNOWN_TRUCK");
   const truck = state.trucks[command.truckId];
-  if (truck === undefined) return reject(state, "UNKNOWN_TRUCK");
   if (!isLocation(command.destinationId)) {
     return reject(state, "UNKNOWN_LOCATION");
   }
@@ -406,11 +405,10 @@ function travel(state: State, command: TravelCommand): TransitionOutcome {
 }
 
 function deliver(state: State, command: DeliverCommand): TransitionOutcome {
+  if (!Object.hasOwn(state.trucks, command.truckId)) return reject(state, "UNKNOWN_TRUCK");
   const truck = state.trucks[command.truckId];
-  if (truck === undefined) return reject(state, "UNKNOWN_TRUCK");
-
+  if (!Object.hasOwn(state.loads, command.loadId)) return reject(state, "UNKNOWN_LOAD");
   const load = state.loads[command.loadId];
-  if (load === undefined) return reject(state, "UNKNOWN_LOAD");
   if (state.minute > M1_SCENARIO.dayEndMinute) {
     return reject(state, "DAY_ENDED");
   }
