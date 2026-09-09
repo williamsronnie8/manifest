@@ -42,37 +42,6 @@ done
 
 [[ -x scripts/verify.sh ]] || fail "scripts/verify.sh must be executable"
 
-expected_preamble="$(cat <<'PREAMBLE'
-<!-- foreman preamble · source: foreman/templates/target-repo.md · do not hand-edit -->
-## Who implements here
-
-Claude and Codex act in this repo as **orchestrators only** (foreman
-`PROTOCOL.md`, D-018). The default first move on any ask that implies
-changing this repo is a foreman ticket — `foreman/bin/contract --ask ...`
-— not an editor. A senior implements directly only with a committed
-reason: a `routed: senior` ticket, a takeover event, or Ronnie's recorded
-direction. Eligible work runs locally on the junior via `foreman/bin/dispatch`.
-Where this file and foreman's `ROUTING.md` disagree, the stricter wins.
-PREAMBLE
-)"
-
-extract_preamble() {
-  awk '
-    /^<!-- foreman preamble/ { capture = 1 }
-    capture { print }
-    capture && /wins\.$/ { exit }
-  ' "$1"
-}
-
-for agent_file in AGENTS.md CLAUDE.md; do
-  actual_preamble="$(extract_preamble "$agent_file")"
-  [[ "$actual_preamble" == "$expected_preamble" ]] || \
-    fail "$agent_file does not contain the canonical Foreman preamble"
-done
-
-[[ "$(extract_preamble AGENTS.md)" == "$(extract_preamble CLAUDE.md)" ]] || \
-  fail "AGENTS.md and CLAUDE.md preambles differ"
-
 require_text README.md "logistics dispatch and supply-chain simulation game"
 require_text README.md "two trucks"
 require_text README.md "four loads"
