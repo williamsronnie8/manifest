@@ -266,6 +266,24 @@ test("rejections follow ADR-0002 precedence and are atomic", () => {
   rejected(initial, advance(), "NO_SCHEDULED_EVENT");
 });
 
+test("prototype property names are unknown identifiers, never inherited entities", () => {
+  const initial = createInitialState();
+  for (const id of ["__proto__", "constructor", "toString", "hasOwnProperty"]) {
+    for (const command of [pickup(id, "L1"), deliver(id, "L1"), travel(id, "North")]) {
+      rejected(initial, command, "UNKNOWN_TRUCK");
+    }
+    for (const command of [pickup("T1", id), deliver("T1", id)]) {
+      rejected(initial, command, "UNKNOWN_LOAD");
+    }
+    rejected(initial, travel("T1", id), "UNKNOWN_LOCATION");
+    const session = createSession();
+    const outcome = submitCommand(session, pickup(id, "L1"));
+    assert.equal(outcome.ok, false);
+    assert.strictEqual(outcome.session, session);
+    assert.deepEqual(outcome.rejection, { code: "UNKNOWN_TRUCK" });
+  }
+});
+
 test("arrival and delivery at minute 480 are allowed, but new work is not", () => {
   let state = apply(createInitialState(), pickup("T1", "L1"));
   state = { ...state, minute: 420 };
