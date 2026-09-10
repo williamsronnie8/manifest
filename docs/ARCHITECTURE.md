@@ -117,6 +117,16 @@ journal; rejected commands leave the session, journal, and accepted event
 history unchanged. Rendering comes from application projections and history,
 never by reconstructing truth from the DOM.
 
+The map-first browser surface uses native HTML buttons over SVG routes. Its
+camera, authored presentation coordinates, and truck/location selections are
+interface state only. Route labels come from the scenario projection; active
+legs, cargo, and arrival minutes come from the session projection. Traveling
+markers represent a leg, not calculated distance or wall-clock animation.
+Selecting a marker, panning, zooming, and fitting never submit commands.
+Contextual Pickup, Travel, Deliver, and the explicit Advance button retain the
+four-command boundary. The context panel filters displayed loads by projected
+location/status, but does not predict command eligibility.
+
 Root verification retains `tsc` type-checking, because Vite's TypeScript pass
 is transpilation only. Adapter contracts, a production build, and a
 real-browser smoke join the engine checks before M1 can close.

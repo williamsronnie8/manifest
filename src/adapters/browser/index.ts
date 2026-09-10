@@ -22,11 +22,11 @@ const rejectionHints: Record<Extract<ReturnType<typeof submitCommand>, { ok: fal
   UNKNOWN_COMMAND: "Choose Pickup, Travel, Deliver, or Advance.",
   UNKNOWN_TRUCK: "Choose a truck listed on the board.",
   UNKNOWN_LOAD: "Choose a load listed on the board.",
-  UNKNOWN_LOCATION: "Choose a location listed in Travel times.",
+  UNKNOWN_LOCATION: "Choose a location on the map.",
   DAY_ENDED: "The day limit has been reached. You can still deliver cargo already at its destination at the limit. Review your result or reset the day.",
   TRUCK_IN_TRANSIT: "This truck is still traveling. Advance to its arrival before giving it another task.",
   LOAD_ALREADY_DELIVERED: "That load is complete. Choose an undelivered load.",
-  LOAD_NOT_AVAILABLE: "That load is already on a truck. Check Carried loads on the board.",
+  LOAD_NOT_AVAILABLE: "That load is already on a truck. Select its truck to inspect carried loads.",
   LOAD_NOT_CARRIED: "This truck isn't carrying that load. Pick it up first, or select the truck carrying it.",
   WRONG_LOCATION: "Pickup requires the load's origin; delivery requires its destination. Travel there, then advance to arrival.",
   INVALID_TRAVEL_LEG: "The truck is already there. Choose a different destination.",
@@ -38,139 +38,61 @@ const rejectionHints: Record<Extract<ReturnType<typeof submitCommand>, { ok: fal
 const SHELL = `
   <div class="manifest-shell">
     <header class="manifest-header">
-      <div>
-        <div class="eyebrow">One-day dispatch simulation</div>
-        <h1>Manifest</h1>
-        <p data-objective></p>
-      </div>
-      <div class="clock">
-        <span class="metric-label">Current minute</span>
-        <output role="group" aria-label="Current minute" data-minute>0</output>
-      </div>
+      <div><div class="eyebrow">One-day dispatch</div><h1>Manifest</h1><p data-objective></p></div>
+      <div class="clock"><span class="metric-label">Current minute</span>
+        <output role="group" aria-label="Current minute" data-minute>0</output></div>
     </header>
-
-    <section class="scenario-strip" aria-label="Authored scenario">
-      <div class="metric">
-        <span class="metric-label">Operating limit</span>
-        <output role="group" data-metric-limit></output>
-      </div>
-      <div class="metric">
-        <span class="metric-label">Locations</span>
-        <output role="group" data-metric-locations></output>
-      </div>
-      <div class="metric">
-        <span class="metric-label">Trucks</span>
-        <output role="group" data-metric-trucks></output>
-      </div>
-      <div class="metric">
-        <span class="metric-label">Loads</span>
-        <output role="group" data-metric-loads></output>
-      </div>
-    </section>
-
-    <div class="manifest-grid">
-      <section class="panel operation-panel" role="region" aria-label="Operation">
-        <div class="panel-inner">
-          <h2>Operation</h2>
-          <p class="run-summary" data-run-summary aria-live="polite"></p>
-          <form>
-            <div class="field-grid">
-              <div class="field" data-command-field>
-                <label for="manifest-command">Command</label>
-                <select id="manifest-command" data-command></select>
-              </div>
-              <div class="field" data-truck-field>
-                <label for="manifest-truck">Truck</label>
-                <select id="manifest-truck" data-truck></select>
-              </div>
-              <div class="field" data-load-field>
-                <label for="manifest-load">Load</label>
-                <select id="manifest-load" data-load></select>
-              </div>
-              <div class="field" data-destination-field>
-                <label for="manifest-destination">Destination</label>
-                <select id="manifest-destination" data-destination></select>
-              </div>
-            </div>
-            <div class="button-row">
-              <button type="submit">Submit command</button>
-              <button type="button" data-advance>Advance to next arrival</button>
-              <button type="button" data-review>Review result</button>
-              <button type="button" data-reset>Reset day</button>
-              <button type="button" data-replay>Replay accepted commands</button>
-            </div>
-          </form>
-          <div role="status" aria-live="polite" data-status>Ready.</div>
-          <p class="help-text" data-rejection-help></p>
-          <details open class="instructions">
-            <summary>How to play</summary>
-            <ol>
-              <li><strong>Pickup:</strong> choose a truck and a load waiting at its location. Load sizes must fit its capacity.</li>
-              <li><strong>Travel:</strong> send that truck to the load's destination. You can dispatch the other truck at the same minute.</li>
-              <li><strong>Advance:</strong> jump to the next arrival. Time never passes by itself.</li>
-              <li><strong>Deliver:</strong> unload at the destination. Arrival doesn't deliver automatically. Pick up your next load and repeat.</li>
-            </ol>
-            <p>Start by picking up L1 with T1 at Depot, then travel to North. Plan T2's trip before advancing.</p>
-            <p>Pickup and delivery take no time. Delivery at the day limit is allowed, but new pickups and travel aren't.</p>
-            <p>Review result shows your current score without changing the day. Replay checks your accepted decisions against a fresh run. Reset starts over. Reloading or closing the page loses this run.</p>
-          </details>
-          <details open class="instructions">
-            <summary>Travel times</summary>
-            <p>Each route takes the same time in both directions.</p>
-            <ul data-routes></ul>
-          </details>
-        </div>
-      </section>
-
-      <div class="stack">
-        <section class="panel" role="region" aria-label="Trucks">
-          <div class="panel-inner">
-            <h2>Trucks</h2>
-            <div class="record-grid" data-trucks></div>
-          </div>
-        </section>
-        <section class="panel" role="region" aria-label="Loads">
-          <div class="panel-inner">
-            <h2>Loads</h2>
-            <div class="record-grid" data-loads></div>
-          </div>
-        </section>
-        <section class="panel" role="region" aria-label="Accepted events">
-          <div class="panel-inner">
-            <h2>Accepted events</h2>
-            <ol class="event-list" data-events></ol>
-          </div>
-        </section>
-        <section class="panel" role="region" aria-label="Result" tabindex="-1" data-result>
-          <div class="panel-inner">
-            <h2>Result</h2>
-            <p class="run-summary" data-result-summary></p>
-            <div class="result-grid">
-              <div class="result-item">
-                <span class="metric-label">Delivered loads</span>
-                <output role="group" aria-label="Delivered loads" data-delivered></output>
-              </div>
-              <div class="result-item">
-                <span class="metric-label">Undelivered loads</span>
-                <output role="group" aria-label="Undelivered loads" data-undelivered></output>
-              </div>
-              <div class="result-item" data-all-delivered-item>
-                <span class="metric-label">All delivered</span>
-                <output role="group" aria-label="All delivered" data-all-delivered></output>
-              </div>
-              <div class="result-item">
-                <span class="metric-label">Completion minute</span>
-                <output role="group" aria-label="Completion minute" data-completion></output>
-              </div>
-              <div class="result-item">
-                <span class="metric-label">Accepted command count</span>
-                <output role="group" aria-label="Accepted command count" data-command-count></output>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
+    <div class="day-bar">
+      <p class="run-summary" data-run-summary aria-live="polite"></p>
+      <button type="button" class="primary" data-advance>Advance to next arrival</button>
+      <button type="button" data-review>Review result</button>
+      <button type="button" data-reset>Reset day</button>
     </div>
+    <main class="dispatch-layout">
+      <section class="map-panel" aria-label="Dispatch map">
+        <div class="map-toolbar" role="group" aria-label="Map controls">
+          <button type="button" data-zoom-in aria-label="Zoom in">+</button>
+          <button type="button" data-zoom-out aria-label="Zoom out">−</button>
+          <button type="button" data-fit>Fit map</button>
+          <output role="group" aria-label="Map zoom" data-zoom>100%</output>
+        </div>
+        <p id="map-help" class="map-help">Select a truck, then a location. Drag to pan · scroll to zoom.<br>Keyboard: Tab to objects. Focus map: arrows pan, +/− zoom, Home fits.</p>
+        <div class="map-viewport" data-map tabindex="0" role="group" aria-label="World map" aria-describedby="map-help">
+          <div class="map-world" data-world>
+            <svg class="map-roads" viewBox="0 0 1000 680" preserveAspectRatio="none" aria-hidden="true" data-roads></svg>
+            <div data-route-labels></div><div data-locations></div><div data-map-trucks></div>
+          </div>
+        </div>
+        <p class="map-legend">Square markers: trucks · Sites: locations · Highlighted roads: active trips<br>Traveling markers show the leg, not distance traveled. Only Advance moves time.</p>
+      </section>
+      <section class="context-panel panel" aria-label="Operation">
+        <h2 tabindex="-1" data-context-heading>Choose a truck on the map</h2>
+        <div data-trucks></div>
+        <p data-destination-summary>Select a location to inspect its loads.</p>
+        <button type="button" class="primary" data-travel disabled>Choose truck and destination</button>
+        <div role="status" aria-live="polite" data-status>Ready.</div>
+        <p class="help-text" data-rejection-help></p>
+        <section aria-label="Loads"><h3>Loads here &amp; aboard</h3><div class="record-grid" data-loads></div></section>
+      </section>
+    </main>
+    <details class="instructions"><summary>How to play &amp; travel times</summary>
+      <p>Select a truck marker, then a location. Pickup loads in the context panel, select a destination on the map, then press Travel. Dispatch both trucks before advancing if you like.</p>
+      <p>Advance jumps to the next arrival. Arrival doesn't deliver automatically: select the truck and press Deliver for its cargo. Pickup and delivery take no time. The engine explains invalid attempts without changing the run.</p>
+      <p>Start with T1 and Depot: Pickup L1, select North, then Travel. Delivery at the day limit is allowed, but new pickups and travel aren't. Review result doesn't end the day. Reloading loses this run.</p>
+      <ul data-routes></ul>
+    </details>
+    <section class="panel result-panel" role="region" aria-label="Result" tabindex="-1" data-result>
+      <h2>Result</h2><p class="run-summary" data-result-summary></p>
+      <div class="result-grid">
+        <div><span class="metric-label">Delivered loads</span><output role="group" aria-label="Delivered loads" data-delivered></output></div>
+        <div><span class="metric-label">Undelivered loads</span><output role="group" aria-label="Undelivered loads" data-undelivered></output></div>
+        <div data-all-delivered-item><span class="metric-label">All delivered</span><output role="group" aria-label="All delivered" data-all-delivered></output></div>
+        <div><span class="metric-label">Completion minute</span><output role="group" aria-label="Completion minute" data-completion></output></div>
+        <div><span class="metric-label">Accepted command count</span><output role="group" aria-label="Accepted command count" data-command-count></output></div>
+      </div>
+      <button type="button" data-replay>Replay accepted commands</button>
+      <section role="region" aria-label="Accepted events"><h3>Accepted events</h3><ol class="event-list" data-events></ol></section>
+    </section>
   </div>
 `;
 
@@ -182,20 +104,21 @@ export function mountManifest(root: HTMLElement): void {
   let session = createSession();
   const journal: ParsedCommand[] = [];
 
-  const form = requireElement<HTMLFormElement>(root, "form");
-  const commandSelect = requireElement<HTMLSelectElement>(root, "[data-command]");
-  const truckSelect = requireElement<HTMLSelectElement>(root, "[data-truck]");
-  const loadSelect = requireElement<HTMLSelectElement>(root, "[data-load]");
-  const destinationSelect = requireElement<HTMLSelectElement>(
-    root,
-    "[data-destination]",
-  );
-  const truckField = requireElement<HTMLElement>(root, "[data-truck-field]");
-  const loadField = requireElement<HTMLElement>(root, "[data-load-field]");
-  const destinationField = requireElement<HTMLElement>(
-    root,
-    "[data-destination-field]",
-  );
+  let selectedTruck: string | undefined;
+  let selectedLocation: string | undefined;
+  const travelButton = requireElement<HTMLButtonElement>(root, "[data-travel]");
+  const map = requireElement<HTMLElement>(root, "[data-map]");
+  const world = requireElement<HTMLElement>(root, "[data-world]");
+  const roads = requireElement<SVGSVGElement>(root, "[data-roads]");
+  const locationButtons = new Map<string, HTMLButtonElement>();
+  const truckButtons = new Map<string, HTMLButtonElement>();
+  // Authored presentation coordinates only. Distances never determine travel time.
+  const sitePoints = [{ x: 24, y: 49 }, { x: 70, y: 23 }, { x: 70, y: 78 }];
+  const points = new Map(scenario.locations.map((id, index) => [id, sitePoints[index]!]));
+  let camera = { x: 0, y: 0, zoom: 1 };
+  let drag: { id: number; x: number; y: number; startX: number; startY: number; moved: boolean } | undefined;
+  let suppressClick = false;
+
   const resetButton = requireElement<HTMLButtonElement>(root, "[data-reset]");
   const replayButton = requireElement<HTMLButtonElement>(root, "[data-replay]");
   const status = requireElement<HTMLElement>(root, "[data-status]");
@@ -230,50 +153,127 @@ export function mountManifest(root: HTMLElement): void {
     "[data-command-count]",
   );
 
-  populateSelect(commandSelect, ["pickup", "travel", "deliver", "advance"]);
-  populateSelect(truckSelect, Object.keys(scenario.trucks));
-  populateSelect(loadSelect, Object.keys(scenario.loads));
-  populateSelect(destinationSelect, scenario.locations);
-
   setText(root, "[data-objective]", `Deliver all ${scenario.objective.loadIds.length} loads by minute ${scenario.dayEndMinute}. Your score is the number delivered, with no speed bonus.`);
   const routes = requireElement<HTMLElement>(root, "[data-routes]");
+  const routeLines: { origin: string; destination: string; line: SVGLineElement }[] = [];
   for (const [origin, destinations] of Object.entries(scenario.travelMinutes)) {
     for (const [destination, minutes] of Object.entries(destinations)) {
       if (scenario.locations.indexOf(origin) >= scenario.locations.indexOf(destination)) continue;
       const route = document.createElement("li");
       route.textContent = `${origin} ↔ ${destination}: ${minutes} minutes`;
       routes.append(route);
+      const from = points.get(origin)!;
+      const to = points.get(destination)!;
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", String(from.x * 10));
+      line.setAttribute("y1", String(from.y * 6.8));
+      line.setAttribute("x2", String(to.x * 10));
+      line.setAttribute("y2", String(to.y * 6.8));
+      roads.append(line);
+      routeLines.push({ origin, destination, line });
+      const label = document.createElement("span");
+      label.className = "route-label";
+      label.textContent = `${minutes} min`;
+      label.style.left = `${(from.x + to.x) / 2}%`;
+      label.style.top = `${(from.y + to.y) / 2}%`;
+      requireElement(root, "[data-route-labels]").append(label);
     }
   }
-  setText(root, "[data-metric-limit]", String(scenario.dayEndMinute));
-  setText(root, "[data-metric-locations]", String(scenario.locations.length));
-  setText(root, "[data-metric-trucks]", String(Object.keys(scenario.trucks).length));
-  setText(root, "[data-metric-loads]", String(Object.keys(scenario.loads).length));
+  for (const id of scenario.locations) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "map-site";
+    button.setAttribute("aria-label", `Select location ${id}`);
+    button.style.left = `${points.get(id)!.x}%`;
+    button.style.top = `${points.get(id)!.y}%`;
+    button.addEventListener("click", () => { selectedLocation = id; render(); });
+    locationButtons.set(id, button);
+    requireElement(root, "[data-locations]").append(button);
+  }
+  for (const id of Object.keys(scenario.trucks)) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "map-truck";
+    button.setAttribute("aria-label", `Select truck ${id}`);
+    button.addEventListener("click", () => {
+      selectedTruck = id;
+      const position = Object.values(projectSession(session).trucks).find((truck) => truck.id === id)!.position;
+      selectedLocation = position.kind === "at" ? position.locationId : position.destinationId;
+      render();
+    });
+    truckButtons.set(id, button);
+    requireElement(root, "[data-map-trucks]").append(button);
+  }
 
-  function populateSelect(select: HTMLSelectElement, values: readonly string[]): void {
-    for (const value of values) {
-      const option = document.createElement("option");
-      option.value = value;
-      option.textContent = value;
-      select.append(option);
+  function renderCamera(): void {
+    camera.x = Math.max(-map.clientWidth * camera.zoom, Math.min(map.clientWidth * camera.zoom, camera.x));
+    camera.y = Math.max(-map.clientHeight * camera.zoom, Math.min(map.clientHeight * camera.zoom, camera.y));
+    world.style.transform = `translate(${camera.x}px, ${camera.y}px) scale(${camera.zoom})`;
+    setText(root, "[data-zoom]", `${Math.round(camera.zoom * 100)}%`);
+  }
+  function fitMap(): void { camera = { x: 0, y: 0, zoom: 1 }; renderCamera(); }
+  function zoomMap(factor: number): void {
+    camera.zoom = Math.max(0.75, Math.min(2.5, camera.zoom * factor));
+    renderCamera();
+  }
+  requireElement(root, "[data-zoom-in]").addEventListener("click", () => zoomMap(1.2));
+  requireElement(root, "[data-zoom-out]").addEventListener("click", () => zoomMap(1 / 1.2));
+  requireElement(root, "[data-fit]").addEventListener("click", fitMap);
+  map.addEventListener("wheel", (event) => {
+    event.preventDefault();
+    if (event.deltaY !== 0) zoomMap(event.deltaY < 0 ? 1.1 : 1 / 1.1);
+  }, { passive: false });
+  map.addEventListener("keydown", (event) => {
+    if (event.target !== map) return;
+    const offsets: Record<string, [number, number]> = { ArrowLeft: [60, 0], ArrowRight: [-60, 0], ArrowUp: [0, 60], ArrowDown: [0, -60] };
+    const offset = offsets[event.key];
+    if (offset) { camera.x += offset[0]; camera.y += offset[1]; renderCamera(); }
+    else if (event.key === "+" || event.key === "=") zoomMap(1.2);
+    else if (event.key === "-") zoomMap(1 / 1.2);
+    else if (event.key === "Home") fitMap();
+    else return;
+    event.preventDefault();
+  });
+  map.addEventListener("focusin", (event) => {
+    const target = event.target as HTMLElement;
+    if (target === map) return;
+    const bounds = map.getBoundingClientRect();
+    const box = target.getBoundingClientRect();
+    if (box.left < bounds.left || box.right > bounds.right || box.top < bounds.top || box.bottom > bounds.bottom) fitMap();
+  });
+  map.addEventListener("pointerdown", (event) => {
+    if (!event.isPrimary || event.button !== 0) return;
+    suppressClick = false;
+    drag = { id: event.pointerId, x: event.clientX, y: event.clientY, startX: camera.x, startY: camera.y, moved: false };
+  });
+  map.addEventListener("pointermove", (event) => {
+    if (!drag || drag.id !== event.pointerId) return;
+    if (event.buttons === 0) { drag = undefined; return; }
+    const dx = event.clientX - drag.x;
+    const dy = event.clientY - drag.y;
+    if (Math.hypot(dx, dy) > 6 && !drag.moved) {
+      drag.moved = true;
+      suppressClick = true;
+      map.setPointerCapture(event.pointerId);
     }
+    if (drag.moved) {
+      camera.x = drag.startX + dx; camera.y = drag.startY + dy;
+      renderCamera();
+    }
+  });
+  function endDrag(event: PointerEvent): void {
+    if (drag?.id !== event.pointerId) return;
+    if (map.hasPointerCapture(event.pointerId)) map.releasePointerCapture(event.pointerId);
+    drag = undefined;
   }
-
-  function resetSelections(): void {
-    commandSelect.value = "pickup";
-    truckSelect.selectedIndex = 0;
-    loadSelect.selectedIndex = 0;
-    destinationSelect.selectedIndex = 0;
-    updateVisibility();
-  }
-
-  function updateVisibility(): void {
-    const command = commandSelect.value;
-    const carriesLoad = command === "pickup" || command === "deliver";
-    truckField.hidden = command === "advance";
-    loadField.hidden = !carriesLoad;
-    destinationField.hidden = command !== "travel";
-  }
+  map.addEventListener("pointerup", endDrag);
+  map.addEventListener("pointercancel", endDrag);
+  map.addEventListener("lostpointercapture", () => { drag = undefined; });
+  map.addEventListener("click", (event) => {
+    // A released drag is navigation, never selection or a domain command.
+    if (suppressClick && event.detail !== 0) { event.preventDefault(); event.stopPropagation(); }
+    suppressClick = false;
+  }, true);
 
   function setStatus(message: string, tone?: "accepted" | "error"): void {
     status.textContent = message;
@@ -285,8 +285,18 @@ export function mountManifest(root: HTMLElement): void {
   function render(): void {
     const projection = projectSession(session);
     minuteOutput.textContent = String(projection.minute);
+    const focusedKey = (document.activeElement as HTMLElement | null)?.dataset.focusKey;
+    renderMap(projection);
     renderTrucks(projection.trucks);
+    setText(root, "[data-context-heading]", selectedTruck ? `${selectedTruck} dispatch` : "Choose a truck on the map");
+    setText(root, "[data-destination-summary]", selectedLocation ? `Selected location: ${selectedLocation}` : "Select a location to inspect its loads.");
+    travelButton.disabled = !selectedTruck || !selectedLocation;
+    travelButton.textContent = selectedTruck && selectedLocation ? `Travel ${selectedTruck} to ${selectedLocation}` : "Choose truck and destination";
     renderLoads(projection.loads);
+    if (focusedKey) {
+      const replacement = Array.from(root.querySelectorAll<HTMLElement>("[data-focus-key]")).find((element) => element.dataset.focusKey === focusedKey);
+      (replacement ?? requireElement<HTMLElement>(root, "[data-context-heading]")).focus({ preventScroll: true });
+    }
     renderEvents(session.events);
 
     const result = projection.result;
@@ -307,11 +317,37 @@ export function mountManifest(root: HTMLElement): void {
     commandCountOutput.textContent = String(journal.length);
   }
 
+  function renderMap(projection: ReturnType<typeof projectSession>): void {
+    for (const [id, button] of locationButtons) {
+      const waiting = Object.values(projection.loads).filter((load) => load.originId === id && load.status.kind === "available");
+      button.textContent = `${id}\n${waiting.length ? waiting.map((load) => load.id).join(" · ") + " waiting" : "No pickups"}`;
+      button.setAttribute("aria-pressed", String(selectedLocation === id));
+    }
+    Object.values(projection.trucks).forEach((truck, index) => {
+      const position = truck.position;
+      const from = points.get(position.kind === "at" ? position.locationId : position.originId)!;
+      const to = position.kind === "at" ? from : points.get(position.destinationId)!;
+      const button = truckButtons.get(truck.id)!;
+      button.style.left = `calc(${(from.x + to.x) / 2}% + ${index === 0 ? -42 : 42}px)`;
+      button.style.top = `calc(${(from.y + to.y) / 2}% + ${position.kind === "at" ? 68 : 52}px)`;
+      button.textContent = `${truck.id}\n${position.kind === "at" ? "Parked" : "→ " + position.arrivalMinute}`;
+      button.setAttribute("aria-pressed", String(selectedTruck === truck.id));
+      button.dataset.position = position.kind;
+      button.title = `${truck.id}: ${position.kind === "at" ? position.locationId : `${position.originId} to ${position.destinationId}, arrival ${position.arrivalMinute}`}. Capacity ${truck.capacity}. Cargo: ${formatIdList(truck.carriedLoadIds)}`;
+    });
+    for (const route of routeLines) {
+      const active = Object.values(projection.trucks).some(({ position }) => position.kind !== "at" &&
+        ((position.originId === route.origin && position.destinationId === route.destination) ||
+         (position.originId === route.destination && position.destinationId === route.origin)));
+      route.line.classList.toggle("active-route", active);
+    }
+  }
+
   function renderTrucks(
     trucks: ReturnType<typeof projectSession>["trucks"],
   ): void {
     trucksRegion.replaceChildren();
-    for (const truck of Object.values(trucks)) {
+    for (const truck of Object.values(trucks).filter((truck) => truck.id === selectedTruck)) {
       const positionKind = truck.position.kind;
       const position =
         positionKind === "at"
@@ -334,6 +370,11 @@ export function mountManifest(root: HTMLElement): void {
   function renderLoads(loads: ReturnType<typeof projectSession>["loads"]): void {
     loadsRegion.replaceChildren();
     for (const load of Object.values(loads)) {
+      // Context is a display filter, not an eligibility check. Both actions still reach the engine.
+      const waitingHere = load.status.kind === "available" && load.originId === selectedLocation;
+      const deliveredHere = load.status.kind === "delivered" && load.destinationId === selectedLocation;
+      const aboard = load.status.kind === "carried" && load.status.truckId === selectedTruck;
+      if (!waitingHere && !deliveredHere && !aboard) continue;
       const statusKind = load.status.kind;
       const statusDetail =
         statusKind === "available"
@@ -352,6 +393,18 @@ export function mountManifest(root: HTMLElement): void {
         ["Size", String(load.size)],
         ["Status", statusDetail],
       ]);
+      const actions = document.createElement("div");
+      actions.className = "load-actions";
+      for (const type of ["pickup", "deliver"] as const) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = `${type === "pickup" ? "Pickup" : "Deliver"} ${load.id}`;
+        button.disabled = !selectedTruck;
+        button.dataset.focusKey = `${type}-${load.id}`;
+        button.addEventListener("click", () => execute({ type, truckId: selectedTruck, loadId: load.id }));
+        actions.append(button);
+      }
+      record.append(actions);
       loadsRegion.append(record);
     }
   }
@@ -441,9 +494,8 @@ export function mountManifest(root: HTMLElement): void {
     );
   }
 
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    execute(commandRecord());
+  travelButton.addEventListener("click", () => {
+    execute({ type: "travel", truckId: selectedTruck, destinationId: selectedLocation });
   });
   requireElement<HTMLButtonElement>(root, "[data-advance]").addEventListener("click", () => {
     execute({ type: "advance" });
@@ -453,12 +505,13 @@ export function mountManifest(root: HTMLElement): void {
     resultRegion.scrollIntoView({ block: "start" });
   });
 
-  commandSelect.addEventListener("change", updateVisibility);
 
   resetButton.addEventListener("click", () => {
     session = createSession();
     journal.length = 0;
-    resetSelections();
+    selectedTruck = undefined;
+    selectedLocation = undefined;
+    fitMap();
     render();
     setStatus("Day reset.", "accepted");
   });
@@ -492,20 +545,7 @@ export function mountManifest(root: HTMLElement): void {
     );
   });
 
-  function commandRecord(): Record<string, unknown> {
-    const type = commandSelect.value;
-    if (type === "advance") return { type };
-    if (type === "travel") {
-      return {
-        type,
-        truckId: truckSelect.value,
-        destinationId: destinationSelect.value,
-      };
-    }
-    return { type, truckId: truckSelect.value, loadId: loadSelect.value };
-  }
-
-  resetSelections();
+  fitMap();
   render();
 }
 

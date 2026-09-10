@@ -38,18 +38,25 @@ new run. No campaign, economy, generated maps, or multiplayer is included.
 Deliver all four loads by minute **480**. Your score is the number delivered,
 not speed. The documented complete route finishes at minute **150**.
 
-1. **Pickup:** select a truck and a load at its location. Cargo must fit the
-   truck's capacity of two units.
-2. **Travel:** choose a destination and submit. You can dispatch the other truck
-   at the same minute, before advancing time.
+1. **Pickup:** click a truck marker on the map, then use **Pickup** beside a
+   waiting load in the context panel. Cargo must fit its capacity of two units.
+2. **Travel:** click a location on the map, then press **Travel** in the context
+   panel. Selecting a marker never dispatches a command. You can dispatch the
+   other truck at the same minute, before advancing time.
 3. **Advance to next arrival:** jump the clock to the next arrival. Time doesn't
    pass by itself, and arriving doesn't unload the truck.
-4. **Deliver:** select the arriving truck and its load to complete the delivery.
-   Pick up the next load and repeat.
+4. **Deliver:** select the arriving truck, then press **Deliver** beside its
+   cargo to complete the delivery. Pick up the next load and repeat.
 
-The board shows routes and travel times, truck positions and capacity, all
-loads, accepted events, and the current score. Rejected commands explain why
-and never change the run. Pickup and travel aren't allowed at minute 480,
+Drag the map to pan, scroll to zoom, or use the zoom and **Fit map** buttons.
+All markers are keyboard buttons. Focus the map itself for arrow-key panning,
++/− zoom, and Home to fit. The map shows routes, travel times, waiting loads,
+and truck markers. Select locations to inspect their waiting/completed loads,
+or trucks to see capacity and cargo. Traveling markers identify their active
+leg and arrival minute, not distance traveled.
+
+Accepted events and the current score remain available below the map. Rejected
+commands explain why and never change the run. Pickup and travel aren't allowed at minute 480,
 but a load already at its destination can still be delivered then.
 
 **Review result** moves to the current score and remaining-load report without
@@ -87,7 +94,8 @@ make verify
 engine, application, parser, and scenario-projection tests, builds the static
 browser artifact, and runs the real-browser suite. Browser checks cover a full
 winning run, incomplete day, rejection atomicity, replay, reset, keyboard
-controls, and desktop/narrow layout. Test screenshots land in `test-results/`.
+controls, map selection, drag/zoom isolation, and desktop/narrow layout.
+Test screenshots land in `test-results/`.
 
 For development use `npm run dev`. Production assets are in `dist/browser/`.
 Verification uses port 4173; the player launcher uses port 4174 so they don't
